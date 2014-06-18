@@ -146,11 +146,9 @@ FileFragment.ContainerActivity, OnNavigationListener, OnSslUntrustedCertListener
 
     
     // mauz added: tmp WIP
-    private static final String FIRST_LEVEL_SYNC_DIR = "/Shared";
-    private static final String SECOND_LEVEL_SYNC_DIR = "/Shared/MobileSync/";
     private static boolean isSyncServiceStarted = false;
     private static String IS_SYNC_SERVICE_STARTED = "is_sync_service_started"; 
-    private static final long REPEAT_TIME = 1000 * 45;
+    private static final long REPEAT_TIME = 1000 * 60;
 
     
     @Override
