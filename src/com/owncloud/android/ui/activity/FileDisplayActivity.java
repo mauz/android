@@ -19,10 +19,13 @@
 package com.owncloud.android.ui.activity;
 
 import java.io.File;
+import java.util.Calendar;
 
 import android.accounts.Account;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -61,17 +64,17 @@ import com.actionbarsherlock.view.Window;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.datamodel.OCFile;
+import com.owncloud.android.files.DownloadSyncReceiverStarter;
 import com.owncloud.android.files.services.FileDownloader;
+import com.owncloud.android.files.services.FileDownloader.FileDownloaderBinder;
 import com.owncloud.android.files.services.FileObserverService;
 import com.owncloud.android.files.services.FileUploader;
-import com.owncloud.android.files.services.FileDownloader.FileDownloaderBinder;
 import com.owncloud.android.files.services.FileUploader.FileUploaderBinder;
-import com.owncloud.android.operations.CreateFolderOperation;
-
 import com.owncloud.android.lib.common.network.CertificateCombinedException;
 import com.owncloud.android.lib.common.operations.RemoteOperation;
 import com.owncloud.android.lib.common.operations.RemoteOperationResult;
 import com.owncloud.android.lib.common.operations.RemoteOperationResult.ResultCode;
+import com.owncloud.android.operations.CreateFolderOperation;
 import com.owncloud.android.operations.CreateShareOperation;
 import com.owncloud.android.operations.RemoveFileOperation;
 import com.owncloud.android.operations.RenameFileOperation;
@@ -141,6 +144,15 @@ FileFragment.ContainerActivity, OnNavigationListener, OnSslUntrustedCertListener
     
     private OCFile mWaitingToSend;
 
+    
+    // mauz added: tmp WIP
+    private static final String FIRST_LEVEL_SYNC_DIR = "/Shared";
+    private static final String SECOND_LEVEL_SYNC_DIR = "/Shared/MobileSync/";
+    private static boolean isSyncServiceStarted = false;
+    private static String IS_SYNC_SERVICE_STARTED = "is_sync_service_started"; 
+    private static final long REPEAT_TIME = 1000 * 45;
+
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log_OC.d(TAG, "onCreate() start");
@@ -165,6 +177,9 @@ FileFragment.ContainerActivity, OnNavigationListener, OnSslUntrustedCertListener
             mWaitingToPreview = (OCFile) savedInstanceState.getParcelable(FileDisplayActivity.KEY_WAITING_TO_PREVIEW);
             mSyncInProgress = savedInstanceState.getBoolean(KEY_SYNC_IN_PROGRESS);
             mWaitingToSend = (OCFile) savedInstanceState.getParcelable(FileDisplayActivity.KEY_WAITING_TO_SEND);
+            
+            //mauz added
+            isSyncServiceStarted = savedInstanceState.getBoolean(IS_SYNC_SERVICE_STARTED);
            
         } else {
             mWaitingToPreview = null;
@@ -242,8 +257,36 @@ FileFragment.ContainerActivity, OnNavigationListener, OnSslUntrustedCertListener
                 updateFragmentsVisibility(!file.isFolder());
                 updateNavigationElementsInActionBar(file.isFolder() ? null : file);
             }
+            
+            // mauz added
+            if(!isSyncServiceStarted) {
+                //togglePolicy(); // mauz added, why can't i remove this develop policy?
+                scheduleSyncService();
+                isSyncServiceStarted = true;
+            }
         }
     }
+    
+    private void scheduleSyncService() {
+        Log.i("DownloadSyncReceiverScheduler", "###### DownloadSyncReceiverScheduler event received");
+
+        AlarmManager service = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        Intent i = new Intent(getApplicationContext(), DownloadSyncReceiverStarter.class);
+        
+        PendingIntent pending = PendingIntent.getBroadcast(getApplicationContext(), 0, i,
+                PendingIntent.FLAG_CANCEL_CURRENT);
+        Calendar cal = Calendar.getInstance();
+        // start 30 seconds after boot completed
+        cal.add(Calendar.SECOND, 30);
+        // fetch every 30 seconds
+        // InexactRepeating allows Android to optimize the energy consumption
+        service.setInexactRepeating(AlarmManager.RTC_WAKEUP,
+                cal.getTimeInMillis(), REPEAT_TIME, pending);
+
+        // service.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
+        // REPEAT_TIME, pending);
+    }
+
 
 
     private void setNavigationListWithFolder(OCFile file) {
@@ -652,6 +695,9 @@ FileFragment.ContainerActivity, OnNavigationListener, OnSslUntrustedCertListener
         //outState.putBoolean(FileDisplayActivity.KEY_REFRESH_SHARES_IN_PROGRESS, mRefreshSharesInProgress);
         outState.putParcelable(FileDisplayActivity.KEY_WAITING_TO_SEND, mWaitingToSend);
 
+        //mauz added
+        outState.putBoolean(IS_SYNC_SERVICE_STARTED, isSyncServiceStarted);
+        
         Log_OC.d(TAG, "onSaveInstanceState() end");
     }
     
