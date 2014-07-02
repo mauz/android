@@ -19,13 +19,10 @@
 package com.owncloud.android.ui.activity;
 
 import java.io.File;
-import java.util.Calendar;
 
 import android.accounts.Account;
-import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -64,7 +61,7 @@ import com.actionbarsherlock.view.Window;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.datamodel.OCFile;
-import com.owncloud.android.files.DownloadSyncReceiverStarter;
+import com.owncloud.android.files.DownloadSyncReceiverScheduler;
 import com.owncloud.android.files.services.FileDownloader;
 import com.owncloud.android.files.services.FileDownloader.FileDownloaderBinder;
 import com.owncloud.android.files.services.FileObserverService;
@@ -258,34 +255,11 @@ FileFragment.ContainerActivity, OnNavigationListener, OnSslUntrustedCertListener
             
             // mauz added
             if(!isSyncServiceStarted) {
-                //togglePolicy(); // mauz added, why can't i remove this develop policy?
-                scheduleSyncService();
+                DownloadSyncReceiverScheduler.scheduleSyncService(getApplicationContext());
                 isSyncServiceStarted = true;
             }
         }
     }
-    
-    private void scheduleSyncService() {
-        Log.i("DownloadSyncReceiverScheduler", "###### DownloadSyncReceiverScheduler event received");
-
-        AlarmManager service = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        Intent i = new Intent(getApplicationContext(), DownloadSyncReceiverStarter.class);
-        
-        PendingIntent pending = PendingIntent.getBroadcast(getApplicationContext(), 0, i,
-                PendingIntent.FLAG_CANCEL_CURRENT);
-        Calendar cal = Calendar.getInstance();
-        // start 30 seconds after boot completed
-        cal.add(Calendar.SECOND, 30);
-        // fetch every 30 seconds
-        // InexactRepeating allows Android to optimize the energy consumption
-        service.setInexactRepeating(AlarmManager.RTC_WAKEUP,
-                cal.getTimeInMillis(), REPEAT_TIME, pending);
-
-        // service.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
-        // REPEAT_TIME, pending);
-    }
-
-
 
     private void setNavigationListWithFolder(OCFile file) {
         mDirectories.clear();
