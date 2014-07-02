@@ -168,11 +168,6 @@ public class DownloadSyncService extends Service {
             firstLevelsyncDir.setParentId(FileDataStorageManager.ROOT_PARENT_ID);
             startSyncFolderOperation(firstLevelsyncDir);
             //}
-            // mauz added, is this really needed ?
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-            }
             
             OCFile secondLevelsyncDir = new OCFile(SECOND_LEVEL_SYNC_DIR);
             secondLevelsyncDir.setMimetype("DIR");
