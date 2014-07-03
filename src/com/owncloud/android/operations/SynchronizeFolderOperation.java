@@ -296,7 +296,7 @@ public class SynchronizeFolderOperation extends RemoteOperation {
         
         // parse data from remote folder 
         OCFile remoteFolder = fillOCFile((RemoteFile)folderAndFiles.get(0));
-        if(remoteFolder != null && mLocalFolder != null) {
+        if(remoteFolder != null) {
             remoteFolder.setParentId(mLocalFolder.getParentId());
             remoteFolder.setFileId(mLocalFolder.getFileId());
             
