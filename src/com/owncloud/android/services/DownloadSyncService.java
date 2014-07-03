@@ -24,7 +24,7 @@ import com.owncloud.android.operations.SynchronizeFolderOperation;
 public class DownloadSyncService extends Service {
 
     // need refactor
-    private static final String FIRST_LEVEL_SYNC_DIR = "/Shared";
+    private static final String FIRST_LEVEL_SYNC_DIR = "/Shared/";
     private static final String SECOND_LEVEL_SYNC_DIR = "/Shared/MobileSync/";
     
     private IBinder mBinder = new DownloadSyncServiceBinder();
@@ -78,7 +78,7 @@ public class DownloadSyncService extends Service {
         OCFile firstLevelsyncDir = mFileDataStorageManager.getFileByPath(FIRST_LEVEL_SYNC_DIR);
         OCFile secondLevelsyncDir = mFileDataStorageManager.getFileByPath(SECOND_LEVEL_SYNC_DIR);
         if(secondLevelsyncDir != null) { 
-            Log.i("DownloadSyncService", "###### got '/Shared/'");
+            Log.i("DownloadSyncService", "###### got '" + FIRST_LEVEL_SYNC_DIR + "'");
             //browseTo(sharedDir);
         }
         if(firstLevelsyncDir != null) {
