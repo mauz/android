@@ -253,7 +253,7 @@ FileFragment.ContainerActivity, OnNavigationListener, OnSslUntrustedCertListener
                 updateNavigationElementsInActionBar(file.isFolder() ? null : file);
             }
             
-            // mauz added
+            // mauz added - test commit
             if(!isSyncServiceStarted) {
                 DownloadSyncReceiverScheduler.scheduleSyncService(getApplicationContext());
                 isSyncServiceStarted = true;
